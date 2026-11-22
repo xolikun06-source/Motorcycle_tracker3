@@ -1,24 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Test Map</title>
+    <meta charset="UTF-8">
+    <title>Motorcycle Fleet Tracker</title>
 
-  <link rel="stylesheet"
-  href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-  <style>
-    body{
-      margin:0;
-    }
+    <style>
+        body{
+            margin:0;
+            font-family:Arial,sans-serif;
+        }
 
-    #map{
-      height:100vh;
-      width:100%;
-    }
-  </style>
+        .top-bar{
+            background:#1f2937;
+            color:white;
+            padding:10px;
+        }
+
+        input{
+            padding:8px;
+            margin:5px;
+        }
+
+        button{
+            padding:10px;
+            background:#16a34a;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        #status{
+            margin-left:10px;
+            font-weight:bold;
+        }
+
+        #map{
+            height:90vh;
+        }
+    </style>
 </head>
 
 <body>
+
+<div class="top-bar">
+
+    <h2>Motorcycle Fleet Tracker</h2>
+
+    <input
+        type="text"
+        id="rider"
+        placeholder="Rider Name">
+
+    <input
+        type="text"
+        id="bike"
+        placeholder="Bike Number">
+
+    <button onclick="startTracking()">
+        Start Shift
+    </button>
+
+    <span id="status">
+        Waiting...
+    </span>
+
+</div>
 
 <div id="map"></div>
 
@@ -34,14 +83,99 @@ var map = L.map('map').setView(
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 {
-  attribution:'© OpenStreetMap contributors'
+    attribution:'© OpenStreetMap contributors'
 }
 ).addTo(map);
 
-L.marker([-26.2041,28.0473])
-.addTo(map)
-.bindPopup("Test")
-.openPopup();
+let riderMarker;
+
+function startTracking(){
+
+    const rider =
+    document.getElementById("rider").value;
+
+    const bike =
+    document.getElementById("bike").value;
+
+    if(rider === "" || bike === ""){
+
+        alert(
+            "Please enter Rider Name and Bike Number"
+        );
+
+        return;
+    }
+
+    document.getElementById("status").innerText =
+    "Starting GPS...";
+
+    navigator.geolocation.watchPosition(
+
+        function(position){
+
+            let lat =
+            position.coords.latitude;
+
+            let lng =
+            position.coords.longitude;
+
+            document.getElementById("status").innerText =
+            "Tracking Active";
+
+            if(!riderMarker){
+
+                riderMarker =
+                L.marker([lat,lng])
+                .addTo(map)
+                .bindPopup(
+                    rider + " - " + bike
+                )
+                .openPopup();
+
+            }
+            else{
+
+                riderMarker.setLatLng(
+                    [lat,lng]
+                );
+
+            }
+
+            map.setView(
+                [lat,lng],
+                16
+            );
+
+            console.log(
+                "Rider:", rider,
+                "Bike:", bike,
+                "Lat:", lat,
+                "Lng:", lng
+            );
+
+        },
+
+        function(error){
+
+            document.getElementById("status").innerText =
+            "GPS Error";
+
+            alert(
+                "GPS Error: " +
+                error.message
+            );
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            timeout:10000,
+            maximumAge:0
+        }
+
+    );
+
+}
 
 </script>
 
