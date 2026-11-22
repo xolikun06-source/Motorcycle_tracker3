@@ -1,71 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Motorcycle Fleet Tracker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<title>Motorcycle Fleet Tracker</title>
 
-    <style>
-        body{
-            margin:0;
-            font-family:Arial,sans-serif;
-        }
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
 
-        .top-bar{
-            background:#1f2937;
-            color:white;
-            padding:10px;
-        }
+<style>
 
-        input{
-            padding:8px;
-            margin:5px;
-        }
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+}
 
-        button{
-            padding:10px;
-            background:#16a34a;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
+.top-bar{
+    background:#1f2937;
+    color:white;
+    padding:15px;
+}
 
-        #status{
-            margin-left:10px;
-            font-weight:bold;
-        }
+input{
+    padding:10px;
+    margin:5px;
+    border:1px solid #ccc;
+    border-radius:5px;
+}
 
-        #map{
-            height:90vh;
-        }
-    </style>
+button{
+    padding:10px 15px;
+    background:#16a34a;
+    color:white;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#15803d;
+}
+
+#status{
+    display:block;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+#map{
+    height:85vh;
+    width:100%;
+}
+
+</style>
+
 </head>
 
 <body>
 
 <div class="top-bar">
 
-    <h2>Motorcycle Fleet Tracker</h2>
+<h2>Motorcycle Fleet Tracker</h2>
 
-    <input
-        type="text"
-        id="rider"
-        placeholder="Rider Name">
+<input
+type="text"
+id="rider"
+placeholder="Rider Name">
 
-    <input
-        type="text"
-        id="bike"
-        placeholder="Bike Number">
+<input
+type="text"
+id="bike"
+placeholder="Bike Number">
 
-    <button onclick="startTracking()">
-        Start Shift
-    </button>
+<button onclick="startTracking()">
+Start Shift
+</button>
 
-    <span id="status">
-        Waiting...
-    </span>
+<span id="status">
+Waiting...
+</span>
 
 </div>
 
@@ -75,6 +89,12 @@
 
 <script>
 
+const SUPABASE_URL =
+"https://myxyywetqldnlyfagdvb.supabase.co/rest/v1/Riders_location";
+
+const SUPABASE_KEY =
+"sb_publishable_KVnIXvi2mSWMotrS_mjbIw_qBhRJY2_";
+
 var map = L.map('map').setView(
 [-26.2041,28.0473],
 13
@@ -83,7 +103,7 @@ var map = L.map('map').setView(
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 {
-    attribution:'© OpenStreetMap contributors'
+ attribution:'© OpenStreetMap'
 }
 ).addTo(map);
 
@@ -97,10 +117,10 @@ function startTracking(){
     const bike =
     document.getElementById("bike").value;
 
-    if(rider === "" || bike === ""){
+    if(!rider || !bike){
 
         alert(
-            "Please enter Rider Name and Bike Number"
+        "Please enter Rider Name and Bike Number"
         );
 
         return;
@@ -111,7 +131,7 @@ function startTracking(){
 
     navigator.geolocation.watchPosition(
 
-        function(position){
+        async function(position){
 
             let lat =
             position.coords.latitude;
@@ -128,12 +148,11 @@ function startTracking(){
                 L.marker([lat,lng])
                 .addTo(map)
                 .bindPopup(
-                    rider + " - " + bike
+                    rider + " (" + bike + ")"
                 )
                 .openPopup();
 
-            }
-            else{
+            }else{
 
                 riderMarker.setLatLng(
                     [lat,lng]
@@ -146,12 +165,58 @@ function startTracking(){
                 16
             );
 
-            console.log(
-                "Rider:", rider,
-                "Bike:", bike,
-                "Lat:", lat,
-                "Lng:", lng
-            );
+            try{
+
+                const response =
+                await fetch(
+                    SUPABASE_URL,
+                    {
+                        method:"POST",
+
+                        headers:{
+                            "apikey":SUPABASE_KEY,
+                            "Authorization":
+                            "Bearer " + SUPABASE_KEY,
+                            "Content-Type":
+                            "application/json",
+                            "Prefer":
+                            "return=representation"
+                        },
+
+                        body:JSON.stringify({
+
+                            rider_name:rider,
+                            bike_number:bike,
+                            latitude:lat,
+                            longitude:lng,
+                            timestamp:new Date().toISOString()
+
+                        })
+
+                    }
+                );
+
+                const result =
+                await response.text();
+
+                console.log(
+                    "Supabase Response:",
+                    result
+                );
+
+                console.log(
+                    "Location Saved"
+                );
+
+            }
+            catch(error){
+
+                console.error(
+                "Supabase Error:",
+                error
+                );
+
+            }
 
         },
 
