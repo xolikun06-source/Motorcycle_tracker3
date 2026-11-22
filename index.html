@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Motorcycle Fleet Tracker</title>
+
+    <link rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        body{
+            margin:0;
+            font-family:Arial,sans-serif;
+        }
+
+        .top-bar{
+            padding:10px;
+            background:#1f2937;
+            color:white;
+        }
+
+        input{
+            padding:8px;
+            margin:5px;
+        }
+
+        button{
+            padding:10px 15px;
+            background:#16a34a;
+            color:white;
+            border:none;
+            cursor:pointer;
+        }
+
+        #map{
+            height:90vh;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="top-bar">
+
+    <h2>Motorcycle Fleet Tracker</h2>
+
+    <input
+        type="text"
+        id="rider"
+        placeholder="Rider Name">
+
+    <input
+        type="text"
+        id="bike"
+        placeholder="Bike Number">
+
+    <button onclick="startTracking()">
+        Start Shift
+    </button>
+
+    <span id="status">
+        Waiting...
+    </span>
+
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+
+let map =
+L.map('map').setView([-26.2041,28.0473],13);
+
+L.tileLayer(
+'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+{
+    maxZoom:19
+}).addTo(map);
+
+let marker;
+
+function startTracking(){
+
+    const rider =
+    document.getElementById("rider").value;
+
+    const bike =
+    document.getElementById("bike").value;
+
+    if(!rider || !bike){
+        alert("Enter Rider Name and Bike Number");
+        return;
+    }
+
+    document.getElementById("status").innerHTML =
+    "Tracking Started";
+
+    navigator.geolocation.watchPosition(
+
+        function(position){
+
+            const lat =
+            position.coords.latitude;
+
+            const lng =
+            position.coords.longitude;
+
+            if(!marker){
+
+                marker =
+                L.marker([lat,lng]).addTo(map);
+
+            }else{
+
+                marker.setLatLng([lat,lng]);
+
+            }
+
+            map.setView([lat,lng]);
+
+            console.log({
+                rider:rider,
+                bike:bike,
+                latitude:lat,
+                longitude:lng,
+                time:new Date()
+            });
+
+        },
+
+        function(error){
+
+            alert("Location access denied");
+
+        },
+
+        {
+            enableHighAccuracy:true,
+            maximumAge:0
+        }
+
+    );
+
+}
+
+</script>
+
+</body>
+</html>
