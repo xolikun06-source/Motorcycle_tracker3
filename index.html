@@ -10,7 +10,7 @@
     <style>
         body{
             margin:0;
-            font-family:Arial, sans-serif;
+            font-family:Arial,sans-serif;
         }
 
         .top-bar{
@@ -19,9 +19,15 @@
             color:white;
         }
 
+        h2{
+            margin:0 0 10px 0;
+        }
+
         input{
             padding:8px;
             margin:5px;
+            border-radius:4px;
+            border:none;
         }
 
         button{
@@ -29,129 +35,27 @@
             background:#16a34a;
             color:white;
             border:none;
+            border-radius:4px;
             cursor:pointer;
-            border-radius:5px;
         }
 
-        #map{
-            height:90vh;
-            width:100%;
+        button:hover{
+            background:#15803d;
         }
 
         #status{
             margin-left:10px;
             font-weight:bold;
         }
+
+        #map{
+            height:90vh;
+            width:100%;
+        }
     </style>
 </head>
-
 <body>
 
 <div class="top-bar">
 
-    <h2>Motorcycle Fleet Tracker</h2>
-
-    <input
-        type="text"
-        id="rider"
-        placeholder="Rider Name">
-
-    <input
-        type="text"
-        id="bike"
-        placeholder="Bike Number">
-
-    <button onclick="startTracking()">
-        Start Shift
-    </button>
-
-    <span id="status">
-        Waiting...
-    </span>
-
-</div>
-
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-<script>
-
-// Create map
-var map = L.map('map').setView(
-    [-26.2041, 28.0473],
-    13
-);
-
-// Add OpenStreetMap layer
-L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution: '&copy; OpenStreetMap contributors'
-    }
-).addTo(map);
-
-// Marker variable
-let riderMarker;
-
-// Start tracking function
-function startTracking() {
-
-    // Test to make sure button works
-    alert("Start Shift clicked");
-
-    document.getElementById("status").innerText =
-    "Starting GPS...";
-
-    navigator.geolocation.getCurrentPosition(
-
-        function(position){
-
-            let lat = position.coords.latitude;
-            let lng = position.coords.longitude;
-
-            document.getElementById("status").innerText =
-            "Tracking Active";
-
-            // Remove old marker if exists
-            if(riderMarker){
-                map.removeLayer(riderMarker);
-            }
-
-            riderMarker = L.marker([lat,lng])
-                .addTo(map)
-                .bindPopup("Current Rider Location")
-                .openPopup();
-
-            map.setView([lat,lng],16);
-
-            console.log("Latitude:", lat);
-            console.log("Longitude:", lng);
-
-        },
-
-        function(error){
-
-            document.getElementById("status").innerText =
-            "GPS Error";
-
-            alert(
-                "GPS Error: " + error.message
-            );
-
-        },
-
-        {
-            enableHighAccuracy:true,
-            timeout:10000,
-            maximumAge:0
-        }
-
-    );
-
-}
-
-</script>
-
-</body>
-</html>
+  
