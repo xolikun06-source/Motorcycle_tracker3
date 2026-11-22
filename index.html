@@ -70,80 +70,59 @@
 
 <script>
 
-let map =
-L.map('map').setView([-26.2041,28.0473],13);
+var map = L.map('map').setView(
+[-26.2041,28.0473],
+13
+);
 
 L.tileLayer(
 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
 {
-    maxZoom:19
-}).addTo(map);
+    attribution:'© OpenStreetMap contributors'
+}
+).addTo(map);
 
-let marker;
+let riderMarker;
 
-function startTracking(){
+navigator.geolocation.watchPosition(
 
-    const rider =
-    document.getElementById("rider").value;
+function(position){
 
-    const bike =
-    document.getElementById("bike").value;
+    let lat = position.coords.latitude;
+    let lng = position.coords.longitude;
 
-    if(!rider || !bike){
-        alert("Enter Rider Name and Bike Number");
-        return;
+    console.log(lat,lng);
+
+    if(!riderMarker){
+
+        riderMarker = L.marker([lat,lng])
+        .addTo(map)
+        .bindPopup("Rider");
+
+    }
+    else{
+
+        riderMarker.setLatLng([lat,lng]);
+
     }
 
-    document.getElementById("status").innerHTML =
-    "Tracking Started";
+    map.setView([lat,lng],16);
 
-    navigator.geolocation.watchPosition(
+},
 
-        function(position){
+function(error){
 
-            const lat =
-            position.coords.latitude;
+    alert("Please allow GPS access");
 
-            const lng =
-            position.coords.longitude;
+},
 
-            if(!marker){
-
-                marker =
-                L.marker([lat,lng]).addTo(map);
-
-            }else{
-
-                marker.setLatLng([lat,lng]);
-
-            }
-
-            map.setView([lat,lng]);
-
-            console.log({
-                rider:rider,
-                bike:bike,
-                latitude:lat,
-                longitude:lng,
-                time:new Date()
-            });
-
-        },
-
-        function(error){
-
-            alert("Location access denied");
-
-        },
-
-        {
-            enableHighAccuracy:true,
-            maximumAge:0
-        }
-
-    );
-
+{
+    enableHighAccuracy:true,
+    maximumAge:0,
+    timeout:10000
 }
+
+);
 
 </script>
 
